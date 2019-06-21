@@ -52,7 +52,7 @@ export default program => {
         experienceName,
         username: user ? user.username : null,
       };
-      await appleApi.ensureAppExists(context);
+      await appleApi.ensureAppExists(context, { enablePushNotifications: true });
 
       const distributionCert = await selectDistributionCert(context);
       const pushKey = await selectPushKey(context);
@@ -71,9 +71,12 @@ export default program => {
           if (listOfCredentials.length === 0) {
             return;
           }
-          const credentials = listOfCredentials.reduce((acc, credential) => {
-            return { ...acc, ...credential };
-          });
+          const credentials = listOfCredentials.reduce(
+            (acc, credential) => {
+              return { ...acc, ...credential };
+            },
+            { teamId: context.team.id }
+          );
           await Credentials.updateCredentialsForPlatform(IOS, credentials, [], {
             username: user.username,
             experienceName,

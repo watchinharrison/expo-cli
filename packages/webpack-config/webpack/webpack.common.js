@@ -19,14 +19,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const BrotliPlugin = require('brotli-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const createIndexHTMLFromAppJSON = require('./createIndexHTMLFromAppJSON');
+const createIndexHTMLFromAppJSONAsync = require('./createIndexHTMLFromAppJSONAsync');
 const createClientEnvironment = require('./createClientEnvironment');
-const getPaths = require('./utils/getPaths');
+const getPathsAsync = require('./utils/getPathsAsync');
 const { enableWithPropertyOrConfig, overrideWithPropertyOrConfig } = require('./utils/config');
 const createFontLoader = require('./loaders/createFontLoader');
-const createBabelLoader = require('./loaders/createBabelLoader');
+const createBabelLoaderAsync = require('./loaders/createBabelLoaderAsync');
 const getMode = require('./utils/getMode');
-const getConfig = require('./utils/getConfig');
+const getConfigAsync = require('./utils/getConfigAsync');
 
 const DEFAULT_ALIAS = {
   // Alias direct react-native imports to react-native-web
@@ -141,13 +141,13 @@ function getDevtool(env, { devtool }) {
   return false;
 }
 
-module.exports = function(env = {}, argv) {
-  const config = getConfig(env);
+module.exports = async function(env = {}, argv) {
+  const config = await getConfigAsync(env);
   const mode = getMode(env);
   const isDev = mode === 'development';
   const isProd = mode === 'production';
 
-  const locations = getPaths(env);
+  const locations = await getPathsAsync(env);
   const publicAppManifest = createEnvironmentConstants(config, locations.production.manifest);
 
   const middlewarePlugins = [];
@@ -186,6 +186,11 @@ module.exports = function(env = {}, argv) {
           // public/ and not a SPA route
           new RegExp('/[^/]+\\.[^/]+$'),
         ],
+        ...(isDev
+          ? {
+              include: [], // Don't cache any assets in dev mode.
+            }
+          : {}),
         ...serviceWorker,
       })
     );
@@ -242,9 +247,9 @@ module.exports = function(env = {}, argv) {
       exclude: locations.template.folder,
     },
     imageLoaderConfiguration,
-    createBabelLoader({
+    await createBabelLoaderAsync({
       mode,
-      babelProjectRoot: locations.root,
+      babelProjectRoot: babelAppConfig.root || locations.root,
       verbose: babelAppConfig.verbose,
       include: babelAppConfig.include,
       use: babelAppConfig.use,
@@ -336,7 +341,7 @@ module.exports = function(env = {}, argv) {
         ]),
 
       // Generate the `index.html`
-      createIndexHTMLFromAppJSON(env),
+      await createIndexHTMLFromAppJSONAsync(env),
 
       // Add variables to the `index.html`
       new InterpolateHtmlPlugin(HtmlWebpackPlugin, {
