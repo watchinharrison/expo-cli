@@ -36,28 +36,6 @@ const config = {
       debug: true,
     },
   },
-  startNextJsFromExpoCLI: {
-    url: 'http://localhost:8000',
-    launch,
-    server: {
-      command: `../expo-cli/bin/expo.js start tests/nextjs/ --web-only --dev --non-interactive --no-https`,
-      port: 8000,
-      launchTimeout: 30000,
-      debug: true,
-    },
-    hasServerSideRendering: true,
-  },
-  buildNextJsFromExpoCLI: {
-    url: 'http://localhost:8000',
-    launch,
-    server: {
-      command: `../expo-cli/bin/expo.js start tests/nextjs/ --web-only --no-dev --non-interactive --no-https`,
-      port: 8000,
-      launchTimeout: 30000,
-      debug: true,
-    },
-    hasServerSideRendering: true,
-  },
   startNextJsFromNextCLI: {
     url: 'http://localhost:8000',
     launch,
