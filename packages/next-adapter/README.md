@@ -35,7 +35,7 @@ import { Document } from '@expo/next-adapter';
 export default Document;
 ```
 
-## Customizing the Document
+### Customizing the Document
 
 You can import the following fragments from the custom Document:
 
@@ -78,6 +78,51 @@ CustomDocument.getInitialProps = async props => {
 };
 
 export default CustomDocument;
+```
+
+### Using the Expo modules in your project
+
+1. Create a `next.config.js` and customize it like so:
+
+```js
+const { pageExtensions, withUnimodules } = require('@expo/next-adapter/config');
+
+module.exports = {
+  pageExtensions,
+  webpack(config, options) {
+    // Further custom configuration here
+    return withUnimodules(config, {
+      projectRoot: __dirname,
+    });
+  },
+};
+```
+
+### Using the Expo service worker
+
+1. Install the packages: `yarn add next-offline`
+2. Create a `next.config.js` and customize it like so:
+
+```js
+// Import withOffline for workbox support
+const withOffline = require('next-offline');
+const {
+  pageExtensions,
+  withUnimodules,
+  // import the Expo service worker for notifications support
+  devSwSrc,
+} = require('@expo/next-adapter/config');
+
+module.exports = withOffline({
+  devSwSrc,
+  pageExtensions,
+  webpack(config, options) {
+    // Further custom configuration here
+    return withUnimodules(config, {
+      projectRoot: __dirname,
+    });
+  },
+});
 ```
 
 ## License
