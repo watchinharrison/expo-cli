@@ -1,9 +1,8 @@
-// @ts-ignore
-import CleanWebpackPlugin from 'clean-webpack-plugin';
 import { Configuration } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { ExpoConfig } from '@expo/config';
 import chalk from 'chalk';
+import { CleanWebpackPlugin } from '../../../node_modules/clean-webpack-plugin';
 import { DevConfiguration, Environment } from './types';
 import { enableWithPropertyOrConfig } from './utils/config';
 import getConfig from './utils/getConfig';
@@ -63,8 +62,8 @@ export default function withReporting(
 
   config.plugins.push(
     // Delete the report folder
-    new CleanWebpackPlugin([absolute(reportDir)], {
-      root,
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [absolute(reportDir)],
       dry: false,
       verbose: reportConfig.verbose,
     }),

@@ -1,8 +1,5 @@
 import { Configuration } from 'webpack';
-
-// @ts-ignore
 import CompressionPlugin from 'compression-webpack-plugin';
-// @ts-ignore
 import BrotliPlugin from 'brotli-webpack-plugin';
 import { ExpoConfig } from '@expo/config';
 import { DevConfiguration, Environment } from './types';

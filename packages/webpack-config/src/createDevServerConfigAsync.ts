@@ -1,5 +1,4 @@
 import errorOverlayMiddleware from 'react-dev-utils/errorOverlayMiddleware';
-// @ts-ignore
 import evalSourceMapMiddleware from 'react-dev-utils/evalSourceMapMiddleware';
 import noopServiceWorkerMiddleware from 'react-dev-utils/noopServiceWorkerMiddleware';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';

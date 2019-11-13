@@ -1,23 +1,19 @@
 import WebpackPWAManifestPlugin from '@expo/webpack-pwa-manifest-plugin';
-import { Configuration, HotModuleReplacementPlugin, Options, Output } from 'webpack';
-// @ts-ignore
-import WebpackDeepScopeAnalysisPlugin from 'webpack-deep-scope-plugin';
-// @ts-ignore
-import CleanWebpackPlugin from 'clean-webpack-plugin';
-// @ts-ignore
-import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin';
-// @ts-ignore
-import PnpWebpackPlugin from 'pnp-webpack-plugin';
-import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin';
-import ManifestPlugin from 'webpack-manifest-plugin';
-import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin';
-// @ts-ignore
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import { boolish } from 'getenv';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import path from 'path';
-import webpack from 'webpack';
-import { getPathsAsync, getPublicPaths } from './utils/paths';
+import PnpWebpackPlugin from 'pnp-webpack-plugin';
+import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin';
+import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin';
+import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin';
+import webpack, { Configuration, HotModuleReplacementPlugin, Options, Output } from 'webpack';
+import WebpackDeepScopeAnalysisPlugin from 'webpack-deep-scope-plugin';
+import ManifestPlugin from 'webpack-manifest-plugin';
+
+import createDevServerConfigAsync from './createDevServerConfigAsync';
+import { withAlias, withCompression, withOptimizations, withReporting } from './extensions';
 import createAllLoaders from './loaders/createAllLoaders';
 import {
   ExpoDefinePlugin,
@@ -25,16 +21,12 @@ import {
   ExpoInterpolateHtmlPlugin,
   ExpoProgressBarPlugin,
 } from './plugins';
+import { Arguments, DevConfiguration, Environment, FilePaths, Mode } from './types';
 import { getModuleFileExtensions } from './utils';
-import { withAlias, withCompression, withOptimizations, withReporting } from './extensions';
-
-import createDevServerConfigAsync from './createDevServerConfigAsync';
-import { Arguments, DevConfiguration, FilePaths, Mode } from './types';
-
 import { overrideWithPropertyOrConfig } from './utils/config';
-import getMode from './utils/getMode';
 import getConfig from './utils/getConfig';
-import { Environment } from './types';
+import getMode from './utils/getMode';
+import { getPathsAsync, getPublicPaths } from './utils/paths';
 
 function getDevtool(
   { production, development }: { production: boolean; development: boolean },
@@ -165,8 +157,8 @@ export default async function(
     plugins: [
       // Delete the build folder
       isProd &&
-        new CleanWebpackPlugin([locations.production.folder], {
-          root: locations.root,
+        new CleanWebpackPlugin({
+          cleanOnceBeforeBuildPatterns: [locations.production.folder],
           dry: false,
           verbose: false,
         }),
