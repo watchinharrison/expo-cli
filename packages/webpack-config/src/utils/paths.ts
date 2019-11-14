@@ -14,6 +14,11 @@ import {
   getAbsolutePathWithProjectRoot,
 } from '@expo/config/paths';
 
+export function getAbsolute(projectRoot: string, ...pathComponents: string[]): string {
+  const inputProjectRoot = projectRoot || getPossibleProjectRoot();
+  return getAbsolutePathWithProjectRoot(inputProjectRoot, ...pathComponents);
+}
+
 function parsePaths(projectRoot: string, nativeAppManifest?: ExpoConfig): FilePaths {
   const inputProjectRoot = projectRoot || getPossibleProjectRoot();
 

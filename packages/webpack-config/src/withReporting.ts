@@ -1,13 +1,14 @@
-import { Configuration } from 'webpack';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { ExpoConfig } from '@expo/config';
 import chalk from 'chalk';
-import { CleanWebpackPlugin } from '../../../node_modules/clean-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import { Configuration } from 'webpack';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+
 import { DevConfiguration, Environment } from './types';
 import { enableWithPropertyOrConfig } from './utils/config';
 import getConfig from './utils/getConfig';
 import getMode from './utils/getMode';
-import { getPaths } from './utils/paths';
+import { getAbsolute } from './utils/paths';
 
 export const DEFAULT_REPORTING_OPTIONS: BundleAnalyzerPlugin.Options & {
   verbose?: boolean;
@@ -53,7 +54,6 @@ export default function withReporting(
   if (!reportConfig) {
     return config;
   }
-  const { absolute, root } = env.locations || getPaths(env.projectRoot);
   if (reportConfig.verbose) {
     maybeWarnAboutRebuilds(env);
   }
@@ -63,7 +63,7 @@ export default function withReporting(
   config.plugins.push(
     // Delete the report folder
     new CleanWebpackPlugin({
-      cleanOnceBeforeBuildPatterns: [absolute(reportDir)],
+      cleanOnceBeforeBuildPatterns: [getAbsolute(env.projectRoot, reportDir)],
       dry: false,
       verbose: reportConfig.verbose,
     }),
@@ -71,8 +71,8 @@ export default function withReporting(
     new BundleAnalyzerPlugin({
       ...reportConfig,
       logLevel: reportConfig.verbose ? 'info' : 'silent',
-      statsFilename: absolute(reportDir, reportConfig.statsFilename),
-      reportFilename: absolute(reportDir, reportConfig.reportFilename),
+      statsFilename: getAbsolute(env.projectRoot, reportDir, reportConfig.statsFilename),
+      reportFilename: getAbsolute(env.projectRoot, reportDir, reportConfig.reportFilename),
     })
   );
 

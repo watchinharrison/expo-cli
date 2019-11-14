@@ -1,7 +1,8 @@
-import { Configuration } from 'webpack';
-import CompressionPlugin from 'compression-webpack-plugin';
-import BrotliPlugin from 'brotli-webpack-plugin';
 import { ExpoConfig } from '@expo/config';
+import BrotliWebpackPlugin from 'brotli-webpack-plugin';
+import CompressionPlugin from 'compression-webpack-plugin';
+import { Configuration } from 'webpack';
+
 import { DevConfiguration, Environment } from './types';
 import { enableWithPropertyOrConfig, overrideWithPropertyOrConfig } from './utils/config';
 import getConfig from './utils/getConfig';
@@ -44,7 +45,7 @@ export function addCompressionPlugins(
   if (!Array.isArray(webpackConfig.plugins)) webpackConfig.plugins = [];
 
   if (gzipConfig) webpackConfig.plugins.push(new CompressionPlugin(gzipConfig));
-  if (brotliConfig) webpackConfig.plugins.push(new BrotliPlugin(brotliConfig));
+  if (brotliConfig) webpackConfig.plugins.push(new BrotliWebpackPlugin(brotliConfig));
 
   return webpackConfig;
 }
