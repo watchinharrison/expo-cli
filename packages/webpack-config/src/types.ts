@@ -63,6 +63,7 @@ export interface FilePathsFolder {
   serveJson: string;
   favicon: string;
   serviceWorker: string;
+  redirects: string;
   registerServiceWorker: string;
 }
 export interface FilePaths {

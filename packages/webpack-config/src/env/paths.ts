@@ -58,6 +58,7 @@ function parsePaths(projectRoot: string, nativeAppManifest?: ExpoConfig): FilePa
       serveJson: templatePath('serve.json'),
       favicon: templatePath('favicon.ico'),
       serviceWorker: templatePath('expo-service-worker.js'),
+      redirects: templatePath('_redirects'),
       registerServiceWorker: templatePath('register-service-worker.js'),
     },
     production: {
@@ -68,6 +69,7 @@ function parsePaths(projectRoot: string, nativeAppManifest?: ExpoConfig): FilePa
       serveJson: getProductionPath('serve.json'),
       favicon: getProductionPath('favicon.ico'),
       serviceWorker: getProductionPath('expo-service-worker.js'),
+      redirects: getProductionPath('_redirects'),
       registerServiceWorker: getProductionPath('register-service-worker.js'),
     },
   };

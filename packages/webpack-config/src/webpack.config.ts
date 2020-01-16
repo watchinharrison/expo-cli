@@ -192,6 +192,7 @@ export default async function(
             // We generate new versions of these based on the templates
             ignore: [
               'expo-service-worker.js',
+              '_redirects',
               'favicon.ico',
               'serve.json',
               'index.html',
