@@ -13,7 +13,11 @@ export type SharpGlobalOptions = {
   [key: string]: string | number | boolean | undefined | null;
 };
 
-export type SharpCommandOptions = RemoveAlphaOptions | ResizeOptions | FlattenOptions;
+export type SharpCommandOptions =
+  | RemoveAlphaOptions
+  | ResizeOptions
+  | FlattenOptions
+  | ExtendOptions;
 
 type FlattenOptions = {
   operation: 'flatten';
@@ -23,6 +27,15 @@ type FlattenOptions = {
 export type ResizeMode = 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
 
 export type ImageFormat = 'input' | 'jpeg' | 'jpg' | 'png' | 'raw' | 'tiff' | 'webp';
+
+type ExtendOptions = {
+  operation: 'extend';
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
+  background: string;
+};
 
 type RemoveAlphaOptions = {
   operation: 'removeAlpha';
@@ -70,7 +83,7 @@ const SHARP_HELP_PATTERN = /\n\nSpecify --help for available options/g;
 
 export async function isAvailableAsync(): Promise<boolean> {
   try {
-    return !!(await findSharpBinAsync());
+    return !!await findSharpBinAsync();
   } catch (_) {
     return false;
   }
@@ -124,6 +137,18 @@ function getCommandOptions(commands: SharpCommandOptions[]): string[] {
     if (command.operation === 'resize') {
       const { operation, width, ...namedOptions } = command;
       args.push(operation, width.toFixed(), ...getOptions(namedOptions));
+    } else if (command.operation === 'extend') {
+      const { operation, top = 0, left = 0, bottom = 0, right = 0, ...namedOptions } = command;
+      if (top + left + bottom + right > 0) {
+        args.push(
+          operation,
+          top.toFixed(),
+          bottom.toFixed(),
+          left.toFixed(),
+          right.toFixed(),
+          ...getOptions(namedOptions)
+        );
+      }
     } else {
       const { operation, ...namedOptions } = command;
       args.push(operation, ...getOptions(namedOptions));
