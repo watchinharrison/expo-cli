@@ -5,23 +5,31 @@ import resizeAsync from './fav/resize';
 import { fromStartupImage } from './splash';
 
 export async function generateSplashScreensAsync(
-  projectRoot: string,
   src: string,
-  dest: string = 'apple'
+  destination: string,
+  publicPath: string,
+  color: string,
+  resizeMode: string,
+  padding: number = 0
 ): Promise<string[]> {
-  const destination = path.join(projectRoot, dest);
   await fs.ensureDir(destination);
 
-  const images = fromStartupImage({ src, resizeMode: 'contain', destination, color: 'blue' });
+  const images = fromStartupImage({
+    src,
+    padding,
+    resizeMode: resizeMode as any,
+    destination,
+    color,
+  });
   const meta = await Promise.all(
     images.map(async img => {
       return {
         name: img.name,
         rel: 'apple-touch-startup-image',
         media: img.media,
-        href: path.join(dest, img.name),
+        href: img.name,
         //   size,
-        //   padding,
+
         src: (await resizeAsync(
           src,
           'image/png',
@@ -29,13 +37,15 @@ export async function generateSplashScreensAsync(
           img.size.height,
           img.resizeMode,
           img.color || 'white',
-          0,
+          img.padding,
           img.destination
         )) as string,
       };
     })
   );
   return meta.map(meta => {
-    return `<link rel="${meta.rel}" href="${meta.href}" media="${meta.media}"></link>`;
+    return `<link rel="${meta.rel}" href="${path.join(publicPath, meta.href)}" media="${
+      meta.media
+    }"></link>`;
   });
 }

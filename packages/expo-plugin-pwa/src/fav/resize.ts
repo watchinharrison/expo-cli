@@ -83,9 +83,10 @@ export async function resizeIconAsync(
   size: number,
   outputPath?: string,
   padding: number = 0,
-  background: string = 'transparent'
+  background: string = 'white',
+  resizeMode: any = 'contain'
 ) {
-  return resizeAsync(source, 'image/png', size, size, 'contain', background, padding, outputPath);
+  return resizeAsync(source, 'image/png', size, size, resizeMode, background, padding, outputPath);
 }
 
 export default async function resizeAsync(
@@ -99,7 +100,7 @@ export default async function resizeAsync(
   outputPath?: string
 ): Promise<string | Buffer> {
   const _outputPath = outputPath || temporary.directory();
-  if (!await isAvailableAsync()) {
+  if (!(await isAvailableAsync())) {
     const buff = await resize(inputPath, mimeType, width, height, fit, background, padding);
     await fs.writeFile(_outputPath, buff);
     return _outputPath;
@@ -126,7 +127,7 @@ export default async function resizeAsync(
           fit,
           background,
         },
-        {
+        padding && {
           operation: 'extend',
           background: 'transparent',
           top: padding,
@@ -134,7 +135,7 @@ export default async function resizeAsync(
           bottom: padding,
           right: padding,
         },
-      ]
+      ].filter(Boolean) as any
     );
 
     return path.join(_outputPath, path.basename(inputPath));

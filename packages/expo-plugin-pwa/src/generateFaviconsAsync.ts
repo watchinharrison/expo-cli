@@ -5,7 +5,11 @@ import generateICO from './fav/ico';
 import { resizeIconAsync } from './fav/resize';
 import generateMeta from './generate-html';
 
-export async function generateFaviconsAsync(src: string, dest: string): Promise<string[]> {
+export async function generateFaviconsAsync(
+  src: string,
+  dest: string,
+  publicPath: string
+): Promise<string[]> {
   const sizes = [16, 32, 48];
   const imgs = await Promise.all(
     sizes.map(async size => {
@@ -24,14 +28,18 @@ export async function generateFaviconsAsync(src: string, dest: string): Promise<
     })
   );
 
-  await generateICO(imgs.map(({ size, src }) => ({ size, filePath: src })), dest, {
-    name: 'favicon',
-    sizes,
-  });
+  await generateICO(
+    imgs.map(({ size, src }) => ({ size, filePath: src })),
+    dest,
+    {
+      name: 'favicon',
+      sizes,
+    }
+  );
 
   return [
-    generateMeta.favicon({ href: 'favicon.ico' }),
-    generateMeta.faviconPng({ size: 16, href: names[0] }),
-    generateMeta.faviconPng({ size: 32, href: names[1] }),
+    generateMeta.favicon({ href: path.join(publicPath, 'favicon.ico') }),
+    generateMeta.faviconPng({ size: 16, href: path.join(publicPath, names[0]) }),
+    generateMeta.faviconPng({ size: 32, href: path.join(publicPath, names[1]) }),
   ];
 }

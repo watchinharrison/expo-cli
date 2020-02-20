@@ -17,6 +17,7 @@ export type Orientation =
 export interface Icon {
   src: string;
   resizeMode: ResizeMode;
+  padding?: number;
   size?: string | number;
   sizes?: number[];
   type?: string;
@@ -28,6 +29,7 @@ export type StartupImage = {
   ios: 'startup';
   name: string;
   src: string;
+  padding?: number;
   size: { width: number; height: number };
   scale: number;
   media: string;
@@ -117,7 +119,13 @@ function getDevices({
   return devices.map(device => ({ ...device, orientations }));
 }
 
-export function fromStartupImage({ src, resizeMode, destination, color }: Icon): StartupImage[] {
+export function fromStartupImage({
+  src,
+  padding,
+  resizeMode,
+  destination,
+  color,
+}: Icon): StartupImage[] {
   // You cannot lock iOS PWA orientation, we should produce every splash screen.
   // orientation
   const devices = getDevices({ orientation: 'any', supportsTablet: false });
@@ -144,6 +152,7 @@ export function fromStartupImage({ src, resizeMode, destination, color }: Icon):
         scale: device.scale,
         media: assembleOrientationMedia(device.width, device.height, device.scale, orientation),
         destination: path.join(destination || '', name),
+        padding,
         resizeMode,
         color,
       });
