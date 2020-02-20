@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import fs from 'fs-extra';
 import { relative, resolve } from 'path';
 
+import { generateManifestAsync } from './generate-manifest';
 import {
   generateAndroidAppIconsAsync,
   generateIosAppIconsAsync,
@@ -12,8 +13,6 @@ import {
 import { generateFaviconsAsync } from './generateFaviconsAsync';
 import { generateSplashScreensAsync } from './generateSplashScreensAsync';
 import shouldUpdate from './update';
-
-let projectDirectory: string = '';
 
 async function commandDidThrowAsync(reason: any) {
   console.log();
@@ -34,22 +33,6 @@ async function commandDidThrowAsync(reason: any) {
 const packageJson = () => require('../package.json');
 
 const program = new Command(packageJson().name).version(packageJson().version);
-
-program
-  .command('init <project-directory>')
-  .usage(`${chalk.green('init <project-directory>')} [options]`)
-  .description('Compress the assets in your Expo project')
-  .option('--favicon', 'Generate favicons')
-  .option('--icon', 'PWA icons')
-  .option('--splash', 'PWA splash screens')
-  .option('--src <image>', 'Source image')
-  .option('-o, --output <folder>', 'Output directory')
-  .action((inputProjectDirectory: string) => {
-    projectDirectory = inputProjectDirectory.trim();
-    init()
-      .then(shouldUpdate)
-      .catch(commandDidThrowAsync);
-  });
 
 program
   .command('icon <src>')
@@ -105,6 +88,22 @@ program
       .catch(commandDidThrowAsync);
   });
 
+program
+  .command('manifest <config>')
+  .description('Generate the PWA manifest from an Expo project config')
+  .option('-o, --output <folder>', 'Output directory', 'public')
+  .option('-p, --public <folder>', 'Public folder. Default: <output>')
+  .action((config: string, options) => {
+    if (!config) throw new Error('pass an expo config path with --config <path>');
+    manifest({
+      src: config,
+      output: options.output,
+      publicPath: options.public || options.output,
+    })
+      .then(shouldUpdate)
+      .catch(commandDidThrowAsync);
+  });
+
 program.parse(process.argv);
 
 async function splash({
@@ -126,15 +125,36 @@ async function splash({
   fs.removeSync(outputPath);
   fs.ensureDirSync(outputPath);
 
-  console.log('ff', relative(_publicPath, outputPath));
-  let meta: string[] = await generateSplashScreensAsync(
+  const meta: string[] = await generateSplashScreensAsync(
     sourcePath,
     outputPath,
     relative(_publicPath, outputPath),
     color,
     resizeMode
   );
-  console.log('meta: ', meta);
+  logMeta(meta);
+}
+async function manifest({
+  src,
+  output,
+  publicPath,
+}: {
+  src: string;
+  output: string;
+  publicPath: string;
+}) {
+  const sourcePath = resolve(src);
+  const outputPath = resolve(output);
+  const _publicPath = resolve(publicPath);
+  fs.removeSync(outputPath);
+  fs.ensureDirSync(outputPath);
+
+  let meta: string[] = await generateManifestAsync({
+    src: sourcePath,
+    dest: outputPath,
+    publicPath: relative(_publicPath, outputPath),
+  });
+  logMeta(meta);
 }
 async function favicon({
   src,
@@ -151,13 +171,12 @@ async function favicon({
   fs.removeSync(outputPath);
   fs.ensureDirSync(outputPath);
 
-  console.log('ff', relative(_publicPath, outputPath));
-  let meta: string[] = await generateFaviconsAsync(
+  const meta: string[] = await generateFaviconsAsync(
     sourcePath,
     outputPath,
     relative(_publicPath, outputPath)
   );
-  console.log('meta: ', meta);
+  logMeta(meta);
 }
 async function icon({
   src,
@@ -187,50 +206,38 @@ async function icon({
     ms: generateWindowsAppIconsAsync,
   }[platform] as any;
 
-  let meta: string[] = await genAsync(
+  const { meta, manifest } = await genAsync(
     sourcePath,
     outputPath,
     relative(_publicPath, outputPath),
     color,
     resizeMode
   );
-  console.log('meta: ', meta);
+  logMeta(meta);
+  logManifest(manifest);
 }
 
-async function init() {
-  // Space out first line
-  // console.log(program.src, program.asset);
-
-  if (typeof projectDirectory === 'string') {
-    projectDirectory = projectDirectory.trim();
+function logManifest(manifest: Record<string, any>) {
+  if (!Object.keys(manifest).length) return;
+  console.log();
+  console.log(
+    chalk.magenta(
+      '\u203A Copy the following lines into your PWA `manifest.json` to link the new assets.'
+    )
+  );
+  console.log();
+  console.log(JSON.stringify(manifest, null, 2));
+  console.log();
+}
+function logMeta(meta: string[]) {
+  if (!meta.length) return;
+  console.log();
+  console.log(
+    chalk.magenta('\u203A Copy the following lines into your HTML <head/> to link the new assets.')
+  );
+  console.log();
+  for (const metaLine of meta) {
+    console.log(metaLine);
   }
-
-  if (!program.src) {
-    throw new Error('pass image path with --src <path.png>');
-  }
-
-  const sourcePath = resolve(program.src);
-  const outputPath = resolve(program.output || 'favicons/');
-
-  fs.removeSync(outputPath);
-  fs.ensureDirSync(outputPath);
-  console.log('generate: ', sourcePath, outputPath);
-  // console.log('output: ', outputPath);
-
-  let meta: string[] = [];
-  // if (program.favicon) {
-  //   const faviconsMeta = await generateFaviconsAsync(sourcePath, outputPath);
-  //   meta.push(...faviconsMeta);
-  // }
-  // if (program.icon) {
-  //   const info = await generateAppIconsAsync(sourcePath, outputPath);
-  //   meta.push(...info.meta);
-  // }
-  // if (program.splash) {
-  //   meta.push(...(await generateSplashScreensAsync(outputPath, sourcePath, 'apple')));
-  // }
-  console.log('META: ');
-  console.log(meta);
-
-  // generateIcon(sourcePath, outputPath);
+  console.log();
 }

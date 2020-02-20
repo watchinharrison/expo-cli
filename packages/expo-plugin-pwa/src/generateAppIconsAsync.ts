@@ -31,6 +31,7 @@ export async function generateAndroidAppIconsAsync(
   resizeMode: string
 ): Promise<{ meta: string[]; manifest: { [key: string]: any } }> {
   const androidIcons = [
+    { name: 'android-chrome-144x144', size: 144, color, resizeMode },
     { name: 'android-chrome-192x192', size: 192, color, resizeMode },
     { name: 'android-chrome-512x512', size: 512, color, resizeMode },
   ];
