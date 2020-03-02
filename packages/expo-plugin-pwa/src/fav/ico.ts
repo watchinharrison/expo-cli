@@ -1,3 +1,7 @@
+/**
+ * From https://github.com/akabekobeko/npm-icon-gen/blob/master/src/lib/ico.ts
+ * Needed more customization to optimize generating favicons
+ */
 import fs from 'fs';
 import path from 'path';
 import { PNG } from 'pngjs';
